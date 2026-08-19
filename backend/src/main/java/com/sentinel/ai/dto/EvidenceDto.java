@@ -1,0 +1,23 @@
+package com.sentinel.ai.dto;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.time.LocalDateTime;
+import java.util.UUID;
+
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class EvidenceDto {
+    private UUID id;
+    private String fileType;
+    private String fileUrl;
+    private String fileHash;
+    private String metadataJson;
+    private UUID incidentId;
+    private LocalDateTime createdAt;
+}

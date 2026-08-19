@@ -1,0 +1,30 @@
+# Dependencies & Build Outputs
+node_modules/
+dist/
+build/
+target/
+*.jar
+*.war
+
+# Environment & Secrets
+.env
+*.env.local
+*.pem
+*.key
+
+# Python / AI Engine
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+.venv/
+*.egg-info/
+.pytest_cache/
+
+# IDE & OS Files
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
