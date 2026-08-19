@@ -24,8 +24,16 @@ spring:
       write-dates-as-timestamps: false
 
 jwt:
-  secret: ${JWT_SECRET:9a2f8c4e1b7d5a0f8c3e6b9a2f5d8c1e4f7a0b3c6d9e2f5a8b1c4d7e0f3a6b9c}
-  expiration: ${JWT_EXPIRATION_MS:86400000}
+  secret: ${JWT_SECRET}
+  access-expiration: ${JWT_ACCESS_EXPIRATION:900000}
+  refresh-expiration: ${JWT_REFRESH_EXPIRATION:604800000}
+
+default-admin:
+  email: ${DEFAULT_ADMIN_EMAIL:}
+  password: ${DEFAULT_ADMIN_PASSWORD:}
+
+frontend:
+  url: ${FRONTEND_URL:http://localhost:3000}
 
 ai-engine:
   url: ${AI_ENGINE_URL:http://localhost:8000}

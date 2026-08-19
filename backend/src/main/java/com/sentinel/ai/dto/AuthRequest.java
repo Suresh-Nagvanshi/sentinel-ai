@@ -10,8 +10,9 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class AuthRequest {
 
-    @NotBlank(message = "Username or email is required")
-    private String username;
+    @NotBlank(message = "Email is required")
+    @jakarta.validation.constraints.Email(message = "Email must be valid")
+    private String email;
 
     @NotBlank(message = "Password is required")
     private String password;

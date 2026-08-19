@@ -6,11 +6,14 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
 
+import org.springframework.beans.factory.annotation.Value;
 import java.util.Arrays;
-import java.util.Collections;
 
 @Configuration
 public class CorsConfig {
+
+    @Value("${frontend.url:http://localhost:3000}")
+    private String frontendUrl;
 
     @Bean
     public CorsFilter corsFilter() {
@@ -18,7 +21,7 @@ public class CorsConfig {
         CorsConfiguration config = new CorsConfiguration();
 
         config.setAllowCredentials(true);
-        config.setAllowedOriginPatterns(Collections.singletonList("*"));
+        config.setAllowedOrigins(Arrays.asList(frontendUrl));
         config.setAllowedHeaders(Arrays.asList("Origin", "Content-Type", "Accept", "Authorization"));
         config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
 

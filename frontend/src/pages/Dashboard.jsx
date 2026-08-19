@@ -6,7 +6,6 @@ import { IncidentTable } from '../components/incidents/IncidentTable';
 import { AlertPanel } from '../components/alerts/AlertPanel';
 import { RiskGauge } from '../components/monitoring/RiskGauge';
 import { IncidentTrendChart } from '../components/charts/IncidentTrendChart';
-import { RiskDistributionChart } from '../components/charts/RiskDistributionChart';
 import { useIncidents } from '../hooks/useIncidents';
 import { useAlerts } from '../hooks/useAlerts';
 import { ShieldAlert, Video, Eye, AlertOctagon } from 'lucide-react';

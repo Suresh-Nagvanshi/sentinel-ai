@@ -154,8 +154,10 @@ npm run dev
 ## 🛰 Core API Specification (Endpoints Overview)
 
 ### Auth & Security
-- `POST /api/v1/auth/login` - Authenticate user & issue JWT
-- `POST /api/v1/auth/refresh` - Refresh access tokens
+- `POST /api/v1/auth/login` - Authenticate by email and issue access/refresh tokens
+- `POST /api/v1/auth/refresh` - Rotate a refresh token and issue a new access token
+- `POST /api/v1/auth/logout` - Revoke the submitted refresh token
+- `GET /api/v1/auth/me` - Return the authenticated safe profile
 
 ### Incident & Alert Management
 - `GET /api/v1/incidents` - List threat incidents with pagination & filters
@@ -174,9 +176,51 @@ npm run dev
 ---
 
 ## 🔒 Security & Compliance
-- **Role-Based Access Control (RBAC)**: `ROLE_ADMIN`, `ROLE_ANALYST`, `ROLE_AUDITOR`, `ROLE_USER`
-- **Audit Logging**: Mandatory immutable timestamped logs for all system interactions
-- **JWT Standard**: HMAC-SHA256 signature validation with configurable token lifetimes
+- **Role-Based Access Control (RBAC)**: `ADMIN`, `SECURITY_OFFICER`, `EMPLOYEE`, enforced by Spring Security on the backend
+- **Audit Logging**: Authentication success, failure, disabled-account, refresh, and logout events are persisted in `activity_logs`
+- **JWT Standard**: HMAC signing with a 15-minute access token and seven-day rotating, hashed refresh tokens
+- **Password Security**: BCrypt password hashes only; password, JWT secret, and raw refresh tokens are never persisted in logs
+
+## Authentication V1
+
+Authentication is stateless at the API layer. PostgreSQL stores users, roles, refresh-token hashes, and authentication activity events. Roles are seeded idempotently on startup. An initial administrator is created only when both `DEFAULT_ADMIN_EMAIL` and `DEFAULT_ADMIN_PASSWORD` are supplied through the environment.
+
+```mermaid
+sequenceDiagram
+    participant UI as React Login
+    participant API as Spring Auth API
+    participant DB as PostgreSQL
+    UI->>API: POST /api/v1/auth/login
+    API->>DB: Load user and BCrypt verify password
+    API->>DB: Store refresh-token hash and LOGIN_SUCCESS
+    API-->>UI: accessToken (15m) + refreshToken (7d) + profile
+    UI->>API: Protected request with Bearer accessToken
+    API-->>UI: 401 when access token expires
+    UI->>API: POST /api/v1/auth/refresh
+    API->>DB: Validate, revoke, and rotate refresh-token hash
+    API-->>UI: Replacement access/refresh tokens
+```
+
+Authorization matrix:
+
+| Capability | ADMIN | SECURITY_OFFICER | EMPLOYEE |
+|---|---:|---:|---:|
+| Dashboard and monitoring | Yes | Yes | Yes |
+| Incidents, alerts, reports, analytics | Yes | Yes | No |
+| Policies, users, settings | Yes | No | No |
+
+The academic frontend stores access and refresh tokens in isolated `localStorage` keys because the current Vite/Spring setup does not yet provide a same-site HTTPS cookie boundary. Production deployment should move the refresh token to a Secure, HttpOnly, SameSite cookie and serve the application over HTTPS.
+
+Required authentication environment variables:
+
+```text
+JWT_SECRET
+JWT_ACCESS_EXPIRATION=900000
+JWT_REFRESH_EXPIRATION=604800000
+DEFAULT_ADMIN_EMAIL
+DEFAULT_ADMIN_PASSWORD
+FRONTEND_URL=http://localhost:3000
+```
 
 ---
 

@@ -3,7 +3,7 @@ import { MainLayout } from '../components/layout/MainLayout';
 import { Card } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
 import { StatusBadge } from '../components/ui/StatusBadge';
-import { Radio, Camera, Cpu, Eye, Activity, ShieldCheck } from 'lucide-react';
+import { Radio, Camera, Cpu } from 'lucide-react';
 
 export const LiveMonitoring = () => {
   const [isStreaming, setIsStreaming] = useState(true);

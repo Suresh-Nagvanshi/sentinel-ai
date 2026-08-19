@@ -22,15 +22,19 @@ public class User extends BaseEntity {
     @Column(nullable = false, unique = true)
     private String email;
 
-    @Column(nullable = false)
-    private String password;
+    @Column(name = "password_hash", nullable = false)
+    private String passwordHash;
 
-    private String fullName;
+    private String firstName;
+
+    private String lastName;
 
     private String department;
 
     @Builder.Default
     private boolean active = true;
+
+    private java.time.LocalDateTime lastLogin;
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(

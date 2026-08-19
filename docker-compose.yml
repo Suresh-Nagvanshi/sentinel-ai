@@ -51,7 +51,12 @@ services:
       - DB_USER=${POSTGRES_USER:-sentinel_user}
       - DB_PASSWORD=${POSTGRES_PASSWORD:-sentinel_secret_password}
       - AI_ENGINE_URL=http://ai-engine:8000
-      - JWT_SECRET=${JWT_SECRET:-9a2f8c4e1b7d5a0f8c3e6b9a2f5d8c1e4f7a0b3c6d9e2f5a8b1c4d7e0f3a6b9c}
+      - JWT_SECRET=${JWT_SECRET:?JWT_SECRET must be set}
+      - JWT_ACCESS_EXPIRATION=${JWT_ACCESS_EXPIRATION:-900000}
+      - JWT_REFRESH_EXPIRATION=${JWT_REFRESH_EXPIRATION:-604800000}
+      - DEFAULT_ADMIN_EMAIL=${DEFAULT_ADMIN_EMAIL:-admin@sentinelai.local}
+      - DEFAULT_ADMIN_PASSWORD=${DEFAULT_ADMIN_PASSWORD:?DEFAULT_ADMIN_PASSWORD must be set}
+      - FRONTEND_URL=${FRONTEND_URL:-http://localhost:3000}
     depends_on:
       postgres:
         condition: service_healthy

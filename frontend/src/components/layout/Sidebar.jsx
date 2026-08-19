@@ -11,18 +11,21 @@ import {
   Users,
   Settings,
 } from 'lucide-react';
+import { useAuth } from '../../hooks/useAuth';
+import { ROLES } from '../../constants/roles';
 
 export const Sidebar = () => {
+  const { user } = useAuth();
   const navItems = [
-    { name: 'Dashboard', path: '/', icon: LayoutDashboard },
-    { name: 'Live Monitoring', path: '/live-monitoring', icon: Radio },
-    { name: 'Incidents', path: '/incidents', icon: AlertOctagon },
-    { name: 'Analytics', path: '/analytics', icon: BarChart3 },
-    { name: 'Reports', path: '/reports', icon: FileText },
-    { name: 'Policies', path: '/policies', icon: Sliders },
-    { name: 'Users', path: '/users', icon: Users },
-    { name: 'Settings', path: '/settings', icon: Settings },
-  ];
+    { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard, roles: [ROLES.ADMIN, ROLES.SECURITY_OFFICER, ROLES.EMPLOYEE] },
+    { name: 'Live Monitoring', path: '/monitoring', icon: Radio, roles: [ROLES.ADMIN, ROLES.SECURITY_OFFICER] },
+    { name: 'Incidents', path: '/incidents', icon: AlertOctagon, roles: [ROLES.ADMIN, ROLES.SECURITY_OFFICER] },
+    { name: 'Analytics', path: '/analytics', icon: BarChart3, roles: [ROLES.ADMIN, ROLES.SECURITY_OFFICER] },
+    { name: 'Reports', path: '/reports', icon: FileText, roles: [ROLES.ADMIN, ROLES.SECURITY_OFFICER] },
+    { name: 'Policies', path: '/policies', icon: Sliders, roles: [ROLES.ADMIN] },
+    { name: 'Users', path: '/users', icon: Users, roles: [ROLES.ADMIN] },
+    { name: 'Settings', path: '/settings', icon: Settings, roles: [ROLES.ADMIN] },
+  ].filter((item) => item.roles.includes(user?.role));
 
   return (
     <aside className="w-64 glass-panel border-r border-slate-800/80 flex flex-col shrink-0 min-h-screen">

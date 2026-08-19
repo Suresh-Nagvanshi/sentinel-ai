@@ -10,13 +10,15 @@ export const RiskDistributionChart = ({ data }) => {
     { name: 'Low', value: 120, color: '#10b981' },
   ];
 
+  const chartData = data?.length ? data : defaultData;
+
   return (
     <Card title="Incident Risk Breakdown" subtitle="Distribution by severity level">
       <div className="h-64 w-full flex items-center justify-center">
         <ResponsiveContainer width="100%" height="100%">
           <PieChart>
             <Pie
-              data={defaultData}
+              data={chartData}
               cx="50%"
               cy="50%"
               innerRadius={55}
@@ -24,7 +26,7 @@ export const RiskDistributionChart = ({ data }) => {
               paddingAngle={5}
               dataKey="value"
             >
-              {defaultData.map((entry, index) => (
+              {chartData.map((entry, index) => (
                 <Cell key={`cell-${index}`} fill={entry.color} />
               ))}
             </Pie>

@@ -19,9 +19,17 @@ public class ActivityLog extends BaseEntity {
 
     private String action;
 
+    private String eventType;
+
+    private boolean success;
+
     private String resource;
 
     private String ipAddress;
+
+    private String userAgent;
+
+    private String reason;
 
     @Column(columnDefinition = "TEXT")
     private String details;

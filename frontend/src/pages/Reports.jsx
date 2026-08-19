@@ -2,7 +2,7 @@ import React from 'react';
 import { MainLayout } from '../components/layout/MainLayout';
 import { Card } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
-import { FileText, Download, Plus } from 'lucide-react';
+import { Download, Plus } from 'lucide-react';
 import { formatDate } from '../utils/formatters';
 
 export const Reports = () => {

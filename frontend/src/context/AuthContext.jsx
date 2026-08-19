@@ -1,52 +1,53 @@
 import React, { createContext, useState, useEffect } from 'react';
 import { authService } from '../services/authService';
+import { clearSession } from '../services/apiClient';
 
 export const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
-  const [token, setToken] = useState(localStorage.getItem('sentinel_token'));
   const [loading, setLoading] = useState(true);
+  const accessToken = localStorage.getItem('sentinel_access_token');
+
+  const resetSession = () => {
+    clearSession();
+    setUser(null);
+  };
 
   useEffect(() => {
-    if (token) {
+    const onExpired = () => setUser(null);
+    window.addEventListener('sentinel:auth-expired', onExpired);
+    if (accessToken) {
       authService
         .getCurrentUser()
-        .then((userData) => setUser(userData))
-        .catch(() => {
-          localStorage.removeItem('sentinel_token');
-          setToken(null);
-        })
+        .then((response) => setUser(response.data))
+        .catch(resetSession)
         .finally(() => setLoading(false));
     } else {
       setLoading(false);
     }
-  }, [token]);
+    return () => window.removeEventListener('sentinel:auth-expired', onExpired);
+  }, [accessToken]);
 
   const login = async (credentials) => {
-    const res = await authService.login(credentials);
-    if (res.success && res.data?.token) {
-      const jwt = res.data.token;
-      localStorage.setItem('sentinel_token', jwt);
-      setToken(jwt);
-      setUser({
-        username: res.data.username,
-        email: res.data.email,
-        roles: res.data.roles,
-      });
-      return true;
-    }
-    return false;
+    const response = await authService.login(credentials);
+    const payload = response.data;
+    localStorage.setItem('sentinel_access_token', payload.accessToken);
+    localStorage.setItem('sentinel_refresh_token', payload.refreshToken);
+    setUser(payload.user);
   };
 
-  const logout = () => {
-    localStorage.removeItem('sentinel_token');
-    setToken(null);
-    setUser(null);
+  const logout = async () => {
+    const refreshToken = localStorage.getItem('sentinel_refresh_token');
+    try {
+      if (refreshToken) await authService.logout(refreshToken);
+    } finally {
+      resetSession();
+    }
   };
 
   return (
-    <AuthContext.Provider value={{ user, token, isAuthenticated: !!token, loading, login, logout }}>
+    <AuthContext.Provider value={{ user, isAuthenticated: Boolean(user), loading, login, logout, refreshToken: () => authService.refresh(localStorage.getItem('sentinel_refresh_token')) }}>
       {children}
     </AuthContext.Provider>
   );
