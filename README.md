@@ -126,8 +126,35 @@ docker-compose up --build -d
 ```bash
 cd backend
 mvn clean install
+
+# Git Bash: create a per-shell development secret; do not commit it.
+export JWT_SECRET="$(openssl rand -base64 32)"
+export DEFAULT_ADMIN_EMAIL="admin@sentinelai.local"
+export DEFAULT_ADMIN_PASSWORD="change-this-local-password"
+
 mvn spring-boot:run
 ```
+
+Spring Boot does not automatically read the repository root `.env` file. In
+Git Bash, load a local `.env` file before starting the backend with
+`set -a; source ../.env; set +a`, after replacing all placeholder values.
+In PowerShell, use:
+
+```powershell
+$bytes = [byte[]](1..32 | ForEach-Object { Get-Random -Maximum 256 })
+$env:JWT_SECRET = [Convert]::ToBase64String($bytes)
+$env:DEFAULT_ADMIN_EMAIL = "admin@sentinelai.local"
+$env:DEFAULT_ADMIN_PASSWORD = "change-this-local-password"
+mvn spring-boot:run
+```
+
+If Maven is not on `PATH` in Git Bash, invoke a Windows Maven installation as
+`"/c/Tools/apache-maven-3.9.14/bin/mvn.cmd" spring-boot:run`. The form
+`C:\Tools\...\mvn.cmd` is interpreted incorrectly by Git Bash.
+
+The backend expects PostgreSQL at `localhost:5432` by default. Start the
+database with `docker compose up -d postgres` or provide `DB_HOST`, `DB_PORT`,
+`DB_NAME`, `DB_USER`, and `DB_PASSWORD` for another PostgreSQL instance.
 
 ### 2. AI Engine (FastAPI)
 ```bash
