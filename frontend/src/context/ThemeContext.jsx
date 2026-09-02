@@ -1,21 +1,15 @@
-import React, { createContext, useState, useEffect } from 'react';
+// ThemeContext — dark mode only for now, wired for future light theme.
+import React, { createContext, useContext, useState } from 'react';
 
-export const ThemeContext = createContext(null);
+const ThemeContext = createContext({ theme: 'dark', toggleTheme: () => {} });
 
 export const ThemeProvider = ({ children }) => {
-  const [theme, setTheme] = useState('dark');
-
-  useEffect(() => {
-    document.documentElement.classList.add('dark');
-  }, []);
-
-  const toggleTheme = () => {
-    setTheme((prev) => (prev === 'dark' ? 'light' : 'dark'));
-  };
-
+  const [theme] = useState('dark');
   return (
-    <ThemeContext.Provider value={{ theme, toggleTheme }}>
+    <ThemeContext.Provider value={{ theme }}>
       {children}
     </ThemeContext.Provider>
   );
 };
+
+export const useTheme = () => useContext(ThemeContext);
