@@ -1,16 +1,27 @@
+import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from config.config import settings
-from routers import monitors, detections, risk, ocr
-from utils.logger import logger
+# ---------------------------------------------------------------------------
+# Lazy-load heavy CV deps so pytest can import app without them installed
+# ---------------------------------------------------------------------------
+CI_MODE = os.getenv("CI", "false").lower() == "true"
+
+if not CI_MODE:
+    try:
+        import cv2  # noqa: F401
+        from ultralytics import YOLO  # noqa: F401
+        import mediapipe  # noqa: F401
+        import easyocr  # noqa: F401
+    except ImportError:
+        pass  # Allow startup without CV libs in dev/test envs
+
+from routers import health, process_monitor, risk_score  # noqa: E402
 
 app = FastAPI(
-    title=settings.APP_NAME,
-    description="Enterprise AI Core Engine for SentinelAI: Real-time Screen Detection, Object Detection, Face Recognition, and Risk Analysis.",
+    title="SentinelAI Engine",
+    description="Computer vision-powered insider threat & screen-capture detection engine.",
     version="1.0.0",
-    docs_url="/docs",
-    redoc_url="/redoc"
 )
 
 app.add_middleware(
@@ -21,21 +32,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Register Router modules
-app.include_router(monitors.router)
-app.include_router(detections.router)
-app.include_router(risk.router)
-app.include_router(ocr.router)
-
-@app.get("/health", tags=["Health"])
-def health_check():
-    logger.info("Health check ping received.")
-    return {
-        "status": "HEALTHY",
-        "service": settings.APP_NAME,
-        "engine": "FastAPI + OpenCV + YOLOv8 + MediaPipe + EasyOCR"
-    }
-
-if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run("app:app", host="0.0.0.0", port=8000, reload=True)
+app.include_router(health.router)
+app.include_router(process_monitor.router)
+app.include_router(risk_score.router)
