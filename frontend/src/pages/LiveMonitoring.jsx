@@ -6,12 +6,12 @@ import { StatusBadge } from '../components/ui/StatusBadge';
 import { Radio, Camera, Cpu, RefreshCw, AlertTriangle, CheckCircle, XCircle } from 'lucide-react';
 
 const INITIAL_PROCESSES = [
-  { pid: 4102, name: 'obs64.exe',         path: 'C:\\Program Files\\obs-studio\\bin\\64bit\\obs64.exe',          status: 'FLAGGED', risk: 0.98, terminated: false },
-  { pid: 9301, name: 'camtasia.exe',      path: 'C:\\Program Files\\TechSmith\\Camtasia\\camtasia.exe',          status: 'FLAGGED', risk: 0.92, terminated: false },
-  { pid: 8910, name: 'chrome.exe',        path: 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe',     status: 'CLEAN',   risk: 0.02, terminated: false },
-  { pid: 3204, name: 'snagit32.exe',      path: 'C:\\Program Files\\TechSmith\\Snagit\\snagit32.exe',            status: 'FLAGGED', risk: 0.87, terminated: false },
-  { pid: 7741, name: 'code.exe',          path: 'C:\\Users\\dev\\AppData\\Local\\Programs\\Microsoft VS Code\\Code.exe', status: 'CLEAN', risk: 0.01, terminated: false },
-  { pid: 5512, name: 'loom.exe',          path: 'C:\\Users\\dev\\AppData\\Local\\Loom\\loom.exe',                 status: 'FLAGGED', risk: 0.89, terminated: false },
+  { pid: 4102, name: 'obs64.exe',    path: 'C:\\Program Files\\obs-studio\\bin\\64bit\\obs64.exe',           status: 'FLAGGED', risk: 0.98, terminated: false },
+  { pid: 9301, name: 'camtasia.exe', path: 'C:\\Program Files\\TechSmith\\Camtasia\\camtasia.exe',           status: 'FLAGGED', risk: 0.92, terminated: false },
+  { pid: 8910, name: 'chrome.exe',   path: 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe',    status: 'CLEAN',   risk: 0.02, terminated: false },
+  { pid: 3204, name: 'snagit32.exe', path: 'C:\\Program Files\\TechSmith\\Snagit\\snagit32.exe',            status: 'FLAGGED', risk: 0.87, terminated: false },
+  { pid: 7741, name: 'code.exe',     path: 'C:\\Users\\dev\\AppData\\Local\\Programs\\Microsoft VS Code\\Code.exe', status: 'CLEAN', risk: 0.01, terminated: false },
+  { pid: 5512, name: 'loom.exe',     path: 'C:\\Users\\dev\\AppData\\Local\\Loom\\loom.exe',                status: 'FLAGGED', risk: 0.89, terminated: false },
 ];
 
 const THREAT_EVENTS = [
@@ -24,22 +24,19 @@ const THREAT_EVENTS = [
   '⚠ MEDIUM — Secondary observer face detected for >3s at WS-104',
 ];
 
-const FEED_STATS = [
-  { label: 'Screen Capture Feed',  fps: 30.0, res: '1920×1080', latency: '12ms',  color: 'text-emerald-400' },
-  { label: 'Webcam Observer Feed', fps: 24.0, res: '1280×720',  latency: '18ms',  color: 'text-cyan-400' },
-];
-
 export const LiveMonitoring = () => {
-  const [isStreaming, setIsStreaming]   = useState(true);
-  const [processes, setProcesses]      = useState(INITIAL_PROCESSES);
-  const [tickerIdx, setTickerIdx]      = useState(0);
-  const [lastScan, setLastScan]        = useState(new Date());
-  const [scanCount, setScanCount]      = useState(0);
+  const [isStreaming, setIsStreaming] = useState(true);
+  const [processes, setProcesses]    = useState(INITIAL_PROCESSES);
+  const [tickerIdx, setTickerIdx]    = useState(0);
+  const [lastScan, setLastScan]      = useState(new Date());
+  const [scanCount, setScanCount]    = useState(0);
   const tickerRef = useRef(null);
 
-  // Advance ticker every 4s while streaming
   useEffect(() => {
-    if (!isStreaming) return;
+    if (!isStreaming) {
+      clearInterval(tickerRef.current);
+      return;
+    }
     tickerRef.current = setInterval(() => {
       setTickerIdx((i) => (i + 1) % THREAT_EVENTS.length);
       setScanCount((c) => c + 1);
@@ -64,7 +61,6 @@ export const LiveMonitoring = () => {
   return (
     <MainLayout>
       <div className="space-y-6">
-        {/* Header */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div>
             <h1 className="text-xl font-extrabold text-slate-100 tracking-tight flex items-center gap-2">
@@ -84,7 +80,6 @@ export const LiveMonitoring = () => {
           </div>
         </div>
 
-        {/* Threat Ticker */}
         <div className="flex items-center gap-3 glass-card border border-slate-800 rounded-xl px-4 py-2.5">
           <span className={`text-[10px] font-bold px-2 py-0.5 rounded ${
             isStreaming ? 'bg-rose-500/20 text-rose-400 animate-pulse' : 'bg-slate-700 text-slate-500'
@@ -99,7 +94,6 @@ export const LiveMonitoring = () => {
           </span>
         </div>
 
-        {/* Status KPIs */}
         <div className="grid grid-cols-3 gap-4">
           <div className="glass-card rounded-xl border border-rose-500/20 p-4">
             <p className="text-2xl font-extrabold text-rose-400">{flagged.length}</p>
@@ -119,18 +113,14 @@ export const LiveMonitoring = () => {
           </div>
         </div>
 
-        {/* Video Feeds */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Screen Capture Feed */}
           <Card title="Screen Capture & Overlay Detector" action={<StatusBadge status={isStreaming ? 'ACTIVE_PROTECTION' : 'DISABLED'} />}>
             <div className="relative aspect-video rounded-xl bg-slate-950 border border-slate-800 flex items-center justify-center overflow-hidden">
               <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent z-10" />
               <div className="text-center p-6 z-20">
-                <Cpu className={`w-12 h-12 mx-auto mb-3 ${ isStreaming ? 'text-blue-500 animate-pulse' : 'text-slate-600'}`} />
+                <Cpu className={`w-12 h-12 mx-auto mb-3 ${isStreaming ? 'text-blue-500 animate-pulse' : 'text-slate-600'}`} />
                 <p className="text-xs font-mono text-slate-300">FastAPI: /screen-detection</p>
-                <p className="text-[11px] text-slate-500 mt-1">
-                  FPS: {FEED_STATS[0].fps} &bull; {FEED_STATS[0].res} &bull; Latency: {FEED_STATS[0].latency}
-                </p>
+                <p className="text-[11px] text-slate-500 mt-1">FPS: 30.0 &bull; 1920×1080 &bull; Latency: 12ms</p>
               </div>
               <div className={`absolute top-3 left-3 z-20 bg-slate-900/90 px-3 py-1 rounded-lg border text-[10px] font-mono ${
                 isStreaming ? 'border-slate-700 text-emerald-400' : 'border-slate-800 text-slate-600'
@@ -140,12 +130,11 @@ export const LiveMonitoring = () => {
             </div>
           </Card>
 
-          {/* Webcam Feed */}
           <Card title="Webcam Device & Observer Detection" action={<StatusBadge status={isStreaming ? 'ACTIVE_PROTECTION' : 'DISABLED'} />}>
             <div className="relative aspect-video rounded-xl bg-slate-950 border border-slate-800 flex items-center justify-center overflow-hidden">
               <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent z-10" />
               <div className="text-center p-6 z-20">
-                <Camera className={`w-12 h-12 mx-auto mb-3 ${ isStreaming ? 'text-cyan-500 animate-pulse' : 'text-slate-600'}`} />
+                <Camera className={`w-12 h-12 mx-auto mb-3 ${isStreaming ? 'text-cyan-500 animate-pulse' : 'text-slate-600'}`} />
                 <p className="text-xs font-mono text-slate-300">FastAPI: /webcam-monitor & /object-detection</p>
                 <p className="text-[11px] text-slate-500 mt-1">
                   {isStreaming ? 'Faces: 1 Whitelisted • Threat Objects: None' : 'Stream inactive'}
@@ -160,7 +149,6 @@ export const LiveMonitoring = () => {
           </Card>
         </div>
 
-        {/* Process Table */}
         <Card
           title="Active Scanned System Processes"
           subtitle={`psutil continuous scan — ${flagged.length} threat(s) detected`}
@@ -179,7 +167,7 @@ export const LiveMonitoring = () => {
               </thead>
               <tbody className="divide-y divide-slate-800 text-slate-300">
                 {processes.map((p) => (
-                  <tr key={p.pid} className={`transition ${ p.terminated ? 'opacity-40' : 'hover:bg-slate-800/30'}` }>
+                  <tr key={p.pid} className={`transition ${p.terminated ? 'opacity-40' : 'hover:bg-slate-800/30'}`}>
                     <td className="py-2.5 px-4 text-slate-500">{p.pid}</td>
                     <td className="py-2.5 px-4">
                       <div className="flex items-center gap-2">
@@ -207,7 +195,7 @@ export const LiveMonitoring = () => {
                       <div className="flex items-center gap-2">
                         <div className="w-12 h-1 rounded-full bg-slate-800">
                           <div
-                            className={`h-full rounded-full ${ p.risk >= 0.8 ? 'bg-rose-500' : p.risk >= 0.5 ? 'bg-amber-500' : 'bg-emerald-500'}`}
+                            className={`h-full rounded-full ${p.risk >= 0.8 ? 'bg-rose-500' : p.risk >= 0.5 ? 'bg-amber-500' : 'bg-emerald-500'}`}
                             style={{ width: `${p.risk * 100}%` }}
                           />
                         </div>

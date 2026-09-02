@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { MainLayout } from '../components/layout/MainLayout';
 import { Card } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
 import { Modal } from '../components/ui/Modal';
 import { StatusBadge } from '../components/ui/StatusBadge';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { policyService } from '../services/policyService';
 import { Sliders, Plus, Trash2, Shield, Eye, Monitor, Lock } from 'lucide-react';
 
@@ -18,10 +18,8 @@ const CATEGORY_META = {
 const EMPTY_FORM = { name: '', description: '', category: 'SCREEN_SECURITY', confidenceThreshold: '0.85', action: 'TERMINATE_AND_ALERT' };
 
 export const Policies = () => {
-  const qc = useQueryClient();
   const { data, isLoading } = useQuery({ queryKey: ['policies'], queryFn: policyService.getPolicies });
 
-  // Local state mirrors server data so toggles feel instant
   const [localPolicies, setLocalPolicies] = useState(null);
   const policies = localPolicies ?? (data?.data || []);
 
@@ -30,9 +28,12 @@ export const Policies = () => {
   const [form, setForm] = useState(EMPTY_FORM);
   const [saving, setSaving] = useState(false);
 
-  // Sync once data arrives
-  React.useEffect(() => {
-    if (data?.data && !localPolicies) setLocalPolicies(data.data);
+  // Only seed local state once when server data first arrives
+  useEffect(() => {
+    if (data?.data && localPolicies === null) {
+      setLocalPolicies(data.data);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data]);
 
   const handleToggle = async (id, enabled) => {
@@ -42,7 +43,6 @@ export const Policies = () => {
     try {
       await policyService.togglePolicy(id, !enabled);
     } catch {
-      // revert on failure
       setLocalPolicies((prev) =>
         prev.map((p) => (p.id === id ? { ...p, enabled } : p))
       );
@@ -68,7 +68,7 @@ export const Policies = () => {
           confidenceThreshold: parseFloat(form.confidenceThreshold),
         }),
       };
-      setLocalPolicies((prev) => [newPolicy, ...prev]);
+      setLocalPolicies((prev) => [newPolicy, ...(prev || [])]);
       setSaving(false);
       setShowAdd(false);
       setForm(EMPTY_FORM);
@@ -82,7 +82,6 @@ export const Policies = () => {
   return (
     <MainLayout>
       <div className="space-y-6">
-        {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <h1 className="text-xl font-extrabold text-slate-100 flex items-center gap-2">
@@ -94,7 +93,6 @@ export const Policies = () => {
           <Button variant="primary" icon={Plus} onClick={() => setShowAdd(true)}>Add Policy</Button>
         </div>
 
-        {/* Category Filter */}
         <div className="flex flex-wrap gap-2">
           {['ALL', ...Object.keys(CATEGORY_META)].map((cat) => (
             <button
@@ -111,7 +109,6 @@ export const Policies = () => {
           ))}
         </div>
 
-        {/* Policy List */}
         <Card title={`Configured Policies (${filtered.length})`}>
           {isLoading && !localPolicies ? (
             <p className="text-xs text-slate-400 py-8 text-center">Loading policies…</p>
@@ -144,8 +141,6 @@ export const Policies = () => {
 
                     <div className="flex items-center gap-3 shrink-0">
                       <StatusBadge status={policy.enabled ? 'ACTIVE_PROTECTION' : 'DISABLED'} />
-
-                      {/* Toggle Switch */}
                       <button
                         onClick={() => handleToggle(policy.id, policy.enabled)}
                         className={`relative w-10 h-5 rounded-full transition-colors ${
@@ -159,7 +154,6 @@ export const Policies = () => {
                           }`}
                         />
                       </button>
-
                       <button
                         onClick={() => handleDelete(policy.id)}
                         className="p-1.5 rounded-lg text-slate-500 hover:text-rose-400 hover:bg-rose-500/10 transition"
@@ -176,7 +170,6 @@ export const Policies = () => {
         </Card>
       </div>
 
-      {/* Add Policy Modal */}
       <Modal isOpen={showAdd} onClose={() => setShowAdd(false)} title="Add New Security Policy">
         <div className="space-y-4">
           <label className="block space-y-1.5">

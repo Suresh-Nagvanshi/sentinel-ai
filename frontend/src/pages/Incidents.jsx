@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { MainLayout } from '../components/layout/MainLayout';
 import { Card } from '../components/ui/Card';
 import { IncidentTable } from '../components/incidents/IncidentTable';
@@ -45,9 +45,13 @@ export const Incidents = () => {
   const [localIncidents, setLocalIncidents] = useState(null);
   const incidents = localIncidents ?? rawIncidents;
 
-  React.useEffect(() => {
-    if (rawIncidents.length && !localIncidents) setLocalIncidents(rawIncidents);
-  }, [rawIncidents]);
+  // Seed local state once when server data first arrives
+  useEffect(() => {
+    if (rawIncidents.length && localIncidents === null) {
+      setLocalIncidents(rawIncidents);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [rawIncidents.length]);
 
   const [selectedIncident, setSelectedIncident] = useState(null);
   const [filterSeverity, setFilterSeverity] = useState('ALL');
@@ -70,7 +74,7 @@ export const Incidents = () => {
 
   const advanceStatus = (id) => {
     setLocalIncidents((prev) =>
-      prev.map((inc) => {
+      (prev || []).map((inc) => {
         if (inc.id !== id) return inc;
         const idx = STATUS_FLOW.indexOf(inc.status);
         const next = STATUS_FLOW[Math.min(idx + 1, STATUS_FLOW.length - 1)];
@@ -79,7 +83,6 @@ export const Incidents = () => {
     );
   };
 
-  // Stats
   const totalCrit = incidents.filter((i) => i.severity === 'CRITICAL').length;
   const totalOpen = incidents.filter((i) => i.status === 'OPEN').length;
   const avgRisk   = incidents.length
@@ -89,7 +92,6 @@ export const Incidents = () => {
   return (
     <MainLayout>
       <div className="space-y-6">
-        {/* Header */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div>
             <h1 className="text-xl font-extrabold text-slate-100 tracking-tight flex items-center gap-2">
@@ -103,12 +105,11 @@ export const Incidents = () => {
           </Button>
         </div>
 
-        {/* KPI strip */}
         <div className="grid grid-cols-3 gap-4">
           {[
-            { label: 'Open',     value: totalOpen, Icon: Clock,       color: 'text-amber-400' },
-            { label: 'Critical', value: totalCrit, Icon: AlertOctagon, color: 'text-rose-400' },
-            { label: 'Avg Risk', value: avgRisk,   Icon: ShieldCheck,  color: 'text-blue-400' },
+            { label: 'Open',     value: totalOpen, Icon: Clock,        color: 'text-amber-400' },
+            { label: 'Critical', value: totalCrit, Icon: AlertOctagon,  color: 'text-rose-400' },
+            { label: 'Avg Risk', value: avgRisk,   Icon: ShieldCheck,   color: 'text-blue-400' },
           ].map(({ label, value, Icon, color }) => (
             <div key={label} className="glass-card rounded-xl border border-slate-800 p-4 flex items-center gap-3">
               <Icon className={`w-6 h-6 ${color}`} />
@@ -120,7 +121,6 @@ export const Incidents = () => {
           ))}
         </div>
 
-        {/* Filters */}
         <div className="flex flex-wrap gap-3 items-center">
           <span className="text-xs text-slate-400 flex items-center gap-1"><Filter className="w-3.5 h-3.5" /> Severity:</span>
           {['ALL', 'CRITICAL', 'HIGH', 'MEDIUM', 'LOW'].map((s) => (
@@ -153,20 +153,15 @@ export const Incidents = () => {
           </button>
         </div>
 
-        {/* Table */}
         <Card>
           {isLoading && !localIncidents ? (
             <p className="text-xs text-slate-400 py-8 text-center">Loading incidents…</p>
           ) : (
-            <IncidentTable
-              incidents={displayed}
-              onViewDetails={(inc) => setSelectedIncident(inc)}
-            />
+            <IncidentTable incidents={displayed} onViewDetails={(inc) => setSelectedIncident(inc)} />
           )}
         </Card>
       </div>
 
-      {/* Detail Modal */}
       <Modal
         isOpen={!!selectedIncident}
         onClose={() => setSelectedIncident(null)}
@@ -187,7 +182,6 @@ export const Incidents = () => {
               <p><strong className="text-slate-400">Risk Score:</strong> <span className="text-rose-400 font-bold">{selectedIncident.riskScore}</span></p>
               <p><strong className="text-slate-400">Detected:</strong> {formatDate(selectedIncident.detectedAt)}</p>
             </div>
-
             <div className="flex justify-between gap-3 pt-1">
               <Button variant="outline" onClick={() => setSelectedIncident(null)}>Close</Button>
               <div className="flex gap-2">
