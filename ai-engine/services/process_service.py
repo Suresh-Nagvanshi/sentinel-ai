@@ -15,5 +15,5 @@ class ProcessMonitorService:
             status="success",
             unauthorized_detected=True,
             flagged_processes=sample_flagged,
-            timestamp=datetime.datetime.utcnow().isoformat()
+            timestamp=datetime.datetime.now(datetime.timezone.utc).isoformat()
         )

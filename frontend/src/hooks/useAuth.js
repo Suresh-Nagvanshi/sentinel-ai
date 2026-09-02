@@ -1,3 +1,8 @@
-// Auth removed — stub keeps any lingering import from crashing.
-// eslint-disable-next-line no-unused-vars
-export const useAuth = () => ({ user: null, isAuthenticated: true, logout: () => {} });
+import { authService } from '../services/authService';
+
+export const useAuth = () => ({
+  user: JSON.parse(localStorage.getItem('user') || 'null'),
+  isAuthenticated: !!localStorage.getItem('accessToken'),
+  login: (credentials) => authService.login(credentials),
+  logout: (refreshToken) => authService.logout(refreshToken),
+});

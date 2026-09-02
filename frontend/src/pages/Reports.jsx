@@ -1,9 +1,7 @@
 import React, { useState } from 'react';
 import { MainLayout } from '../components/layout/MainLayout';
-import { Card } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
 import { Modal } from '../components/ui/Modal';
-import { StatusBadge } from '../components/ui/StatusBadge';
 import { Download, Plus, FileText, Clock, CheckCircle } from 'lucide-react';
 import { formatDate } from '../utils/formatters';
 

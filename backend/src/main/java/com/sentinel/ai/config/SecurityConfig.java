@@ -60,11 +60,11 @@ public class SecurityConfig {
                                 "/ws/**",
                                 "/actuator/**"
                         ).permitAll()
+                            .requestMatchers("/users/me", "/auth/me", "/evidence/**", "/evidences/**").authenticated()
                             .requestMatchers("/users/**", "/policies/**").hasRole("ADMIN")
                             .requestMatchers("/incidents/**", "/alerts/**", "/reports/**", "/analytics/**")
                             .hasAnyRole("ADMIN", "SECURITY_OFFICER")
                             .requestMatchers("/monitoring/**").hasAnyRole("ADMIN", "SECURITY_OFFICER")
-                            .requestMatchers("/auth/me", "/evidence/**", "/evidences/**").authenticated()
                             .anyRequest().authenticated()
                 );
 

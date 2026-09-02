@@ -16,7 +16,7 @@ if not CI_MODE:
     except ImportError:
         pass  # Allow startup without CV libs in dev/test envs
 
-from routers import health, process_monitor, risk_score  # noqa: E402
+from routers import health, monitors, risk, detections, ocr  # noqa: E402
 
 app = FastAPI(
     title="SentinelAI Engine",
@@ -33,5 +33,7 @@ app.add_middleware(
 )
 
 app.include_router(health.router)
-app.include_router(process_monitor.router)
-app.include_router(risk_score.router)
+app.include_router(monitors.router)
+app.include_router(risk.router)
+app.include_router(detections.router)
+app.include_router(ocr.router)

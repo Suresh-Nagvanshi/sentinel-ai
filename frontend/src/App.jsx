@@ -8,11 +8,13 @@ import { Analytics } from './pages/Analytics';
 import { Policies } from './pages/Policies';
 import { Users } from './pages/Users';
 import { Settings } from './pages/Settings';
+import { Login } from './pages/Login';
 import { NotFound } from './pages/NotFound';
 
 export default function App() {
   return (
     <Routes>
+      <Route path="/login" element={<Login />} />
       <Route path="/" element={<Navigate to="/dashboard" replace />} />
       <Route path="/dashboard" element={<Dashboard />} />
       <Route path="/monitoring" element={<LiveMonitoring />} />

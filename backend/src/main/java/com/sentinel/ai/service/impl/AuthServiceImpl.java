@@ -95,7 +95,8 @@ public class AuthServiceImpl implements AuthService {
     @Transactional(readOnly = true)
     public UserProfileDto getCurrentUser(String username) {
         User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new UnauthorizedException("Authenticated user not found"));
+                .orElseGet(() -> userRepository.findByEmail(username)
+                        .orElseThrow(() -> new UnauthorizedException("Authenticated user not found")));
         return profile(user);
     }
 

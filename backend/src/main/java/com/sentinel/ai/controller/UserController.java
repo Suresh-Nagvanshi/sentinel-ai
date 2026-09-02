@@ -16,6 +16,12 @@ import java.util.UUID;
 public class UserController {
 
     private final UserService userService;
+    private final com.sentinel.ai.service.AuthService authService;
+
+    @GetMapping("/me")
+    public ResponseEntity<ApiResponse<com.sentinel.ai.dto.UserProfileDto>> me(org.springframework.security.core.Authentication authentication) {
+        return ResponseEntity.ok(ApiResponse.success(authService.getCurrentUser(authentication.getName())));
+    }
 
     @GetMapping
     public ResponseEntity<ApiResponse<List<UserDto>>> getAllUsers() {
