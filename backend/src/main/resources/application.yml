@@ -24,16 +24,18 @@ spring:
       write-dates-as-timestamps: false
 
 jwt:
-  secret: ${JWT_SECRET}
+  # In production, override JWT_SECRET with a strong 256-bit env var.
+  # The default below is for local development ONLY — never use in prod.
+  secret: ${JWT_SECRET:sentinelai-local-dev-secret-key-change-in-production-256bits}
   access-expiration: ${JWT_ACCESS_EXPIRATION:900000}
   refresh-expiration: ${JWT_REFRESH_EXPIRATION:604800000}
 
 default-admin:
-  email: ${DEFAULT_ADMIN_EMAIL:}
-  password: ${DEFAULT_ADMIN_PASSWORD:}
+  email: ${DEFAULT_ADMIN_EMAIL:admin@sentinelai.local}
+  password: ${DEFAULT_ADMIN_PASSWORD:Admin@123}
 
 frontend:
-  url: ${FRONTEND_URL:http://localhost:3000}
+  url: ${FRONTEND_URL:http://localhost:5173}
 
 ai-engine:
   url: ${AI_ENGINE_URL:http://localhost:8000}
